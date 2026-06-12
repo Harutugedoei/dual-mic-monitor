@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual Mic Level Monitor</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0e3d38;
+    color: #d6ede8;
+    font-family: 'Courier New', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: #F4CC70;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    text-shadow: 0 1px 8px rgba(244,204,112,0.25);
+  }
+  .subtitle {
+    font-size: 0.72rem;
+    color: #6AB187;
+    letter-spacing: 0.12em;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+  .device-info {
+    width: 100%;
+    max-width: 820px;
+    background: #154f48;
+    border: 1px solid #20948B;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 0.76rem;
+    color: #6AB187;
+    letter-spacing: 0.05em;
+  }
+  .device-info strong { color: #F4CC70; font-weight: normal; }
+  .monitors {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 820px;
+    margin-bottom: 20px;
+  }
+  .channel {
+    flex: 1;
+    background: #154f48;
+    border: 1px solid #20948B;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .channel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .channel-label { font-size: 0.85rem; letter-spacing: 0.15em; color: #6AB187; }
+  .ch-badge {
+    font-size: 0.68rem;
+    color: #20948B;
+    letter-spacing: 0.1em;
+    border: 1px solid #20948B;
+    border-radius: 3px;
+    padding: 1px 6px;
+  }
+  .peak-led {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #0e3d38;
+    border: 1px solid #20948B;
+    transition: background 0.05s;
+  }
+  .peak-led.active {
+    background: #DE7A22;
+    box-shadow: 0 0 9px #DE7A22;
+  }
+  .vu-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .vu-row { display: flex; align-items: center; gap: 8px; }
+  .vu-label { font-size: 0.7rem; color: #6AB187; width: 16px; }
+  .vu-bar-bg {
+    flex: 1; height: 22px;
+    background: #092e2a;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .vu-bar {
+    height: 100%; width: 0%;
+    border-radius: 3px;
+    transition: width 0.03s;
+    background: linear-gradient(to right, #20948B 50%, #F4CC70 78%, #DE7A22 100%);
+  }
+  .vu-db { font-size: 0.8rem; color: #6AB187; width: 56px; text-align: right; }
+
+  .diff-panel {
+    width: 100%; max-width: 820px;
+    background: #154f48;
+    border: 1px solid #20948B;
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .diff-label { font-size: 0.8rem; color: #6AB187; letter-spacing: 0.1em; }
+  .diff-value {
+    font-size: 1.8rem; font-weight: bold;
+    letter-spacing: 0.05em;
+    color: #F4CC70;
+    transition: color 0.1s;
+    min-width: 100px; text-align: center;
+  }
+  .diff-value.warn { color: #DE7A22; }
+  .diff-value.danger { color: #c0442a; }
+  .diff-bar-wrap {
+    flex: 1; height: 10px;
+    background: #092e2a;
+    border-radius: 5px;
+    position: relative; overflow: visible;
+  }
+  .diff-bar-fill {
+    position: absolute; height: 100%;
+    border-radius: 5px;
+    background: #20948B;
+    transition: all 0.05s;
+  }
+  .diff-center {
+    position: absolute; left: 50%; top: -3px;
+    width: 2px; height: 16px;
+    background: #20948B;
+    transform: translateX(-50%);
+  }
+  .controls { margin-top: 16px; display: flex; gap: 12px; }
+  button {
+    padding: 9px 22px;
+    border-radius: 5px;
+    border: 1px solid #20948B;
+    background: #154f48;
+    color: #d6ede8;
+    font-family: inherit;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  button:hover { background: #1a6660; border-color: #6AB187; }
+  button.active { background: #1a3a20; border-color: #F4CC70; color: #F4CC70; }
+  .status { font-size: 0.72rem; color: #6AB187; opacity: 0.75; margin-top: 8px; }
+  .warn-msg {
+    font-size: 0.72rem; color: #DE7A22;
+    margin-top: 6px; display: none;
+  }
+</style>
+</head>
+<body>
+<h1>⬤ Dual Mic Level Monitor</h1>
+<div class="subtitle">AUDIO INTERFACE — 2CH MODE</div>
+
+<div class="device-info">
+  入力デバイス：<strong id="devName">（開始すると表示されます）</strong><br>
+  ※ Macの「システム設定 → サウンド → 入力」で Audio I/F を選択してから開始してください
+</div>
+
+<div class="monitors">
+  <!-- MIC 1 = Ch1 -->
+  <div class="channel">
+    <div class="channel-header">
+      <span class="channel-label">MIC 1</span>
+      <span class="ch-badge">CH 1</span>
+      <div class="peak-led" id="peak1"></div>
+    </div>
+    <div class="vu-wrap">
+      <div class="vu-row">
+        <span class="vu-label">L</span>
+        <div class="vu-bar-bg"><div class="vu-bar" id="vu1"></div></div>
+        <span class="vu-db" id="db1">— dB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIC 2 = Ch2 -->
+  <div class="channel">
+    <div class="channel-header">
+      <span class="channel-label">MIC 2</span>
+      <span class="ch-badge">CH 2</span>
+      <div class="peak-led" id="peak2"></div>
+    </div>
+    <div class="vu-wrap">
+      <div class="vu-row">
+        <span class="vu-label">L</span>
+        <div class="vu-bar-bg"><div class="vu-bar" id="vu2"></div></div>
+        <span class="vu-db" id="db2">— dB</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="diff-panel">
+  <span class="diff-label">LEVEL DIFF</span>
+  <div class="diff-value" id="diffVal">— dB</div>
+  <div class="diff-bar-wrap">
+    <div class="diff-center"></div>
+    <div class="diff-bar-fill" id="diffBar" style="left:50%;width:0%"></div>
+  </div>
+  <span class="diff-label" id="diffWho" style="min-width:60px;text-align:right;font-size:0.75rem;"></span>
+</div>
+
+<div class="controls">
+  <button id="startBtn">▶ 開始</button>
+</div>
+<div class="status" id="statusMsg">「開始」を押して、マイクへのアクセスを許可してください。</div>
+<div class="warn-msg" id="warnMsg"></div>
+
+<div style="margin-top:12px; display:flex; gap:16px;">
+  <a href="#" id="howLink" style="font-size:0.75rem;color:#6AB187;opacity:0.75;text-decoration:none;letter-spacing:0.08em;border-bottom:1px solid #20948B;">使い方</a>
+  <a href="#" id="helpLink" style="font-size:0.75rem;color:#6AB187;opacity:0.75;text-decoration:none;letter-spacing:0.08em;border-bottom:1px solid #20948B;">うまく動かないときは</a>
+</div>
+
+<!-- How-to Modal -->
+<div id="howModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#154f48;border:1px solid #20948B;border-radius:10px;padding:28px 28px 24px;max-width:480px;width:90%;position:relative;">
+    <button id="howClose" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#6AB187;font-size:1.2rem;cursor:pointer;padding:0;">✕</button>
+    <h2 style="font-size:0.95rem;letter-spacing:0.15em;color:#F4CC70;margin-bottom:18px;">使い方</h2>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">推奨環境</div>
+      <ul style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+        <li>OS：Mac</li>
+        <li>ブラウザ：Google Chrome</li>
+      </ul>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">手順</div>
+      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+        <li>Audio I/F を Mac に接続し、2本のマイクをそれぞれ CH1・CH2 に挿す</li>
+        <li>Macの「システム設定 → サウンド → 入力」で Audio I/F を選択する</li>
+        <li>この HTML ファイルを Chrome で開く（ダブルクリックでOK）</li>
+        <li>「開始」を押し、マイクへのアクセスを「許可」する</li>
+        <li>MIC 1（CH1）と MIC 2（CH2）のレベルを確認する</li>
+      </ol>
+    </div>
+
+    <div>
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">LEVEL DIFF の見方</div>
+      <ul style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+        <li>バーが中央：2本のレベルが揃っている</li>
+        <li>バーが左：MIC 1 の方が大きい</li>
+        <li>バーが右：MIC 2 の方が大きい</li>
+        <li style="color:#D9B44A;">黄色：3dB 以上の差</li>
+        <li style="color:#c0442a;">赤：6dB 以上の差</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div id="helpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#154f48;border:1px solid #20948B;border-radius:10px;padding:28px 28px 24px;max-width:480px;width:90%;position:relative;">
+    <button id="helpClose" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#6AB187;font-size:1.2rem;cursor:pointer;padding:0;">✕</button>
+    <h2 style="font-size:0.95rem;letter-spacing:0.15em;color:#F4CC70;margin-bottom:18px;">うまく動かないときは</h2>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">確認 1 — MacのI/F認識</div>
+      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+        <li>システム設定 → サウンド → 入力 に Audio I/F が表示されているか確認</li>
+        <li>I/Fを選択し、入力レベルのバーが動くか確認</li>
+      </ol>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">確認 2 — Chromeのマイク許可</div>
+      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+        <li>アドレスバー左のアイコン → サイトの設定 → マイクを「許可」に</li>
+        <li>ページを再読み込みして再度「開始」を押す</li>
+      </ol>
+    </div>
+    <div>
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">確認 3 — MIC 2 が動かない</div>
+      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+        <li>画面上部の「入力デバイス」表示が Audio I/F の名前になっているか確認</li>
+        <li>内蔵マイクになっている場合は、システム設定で I/F を選び直してからページを再読み込み</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+const state = {
+  running: false,
+  stream: null,
+  analysers: [null, null],
+  peakHold: [-Infinity, -Infinity],
+  peakTimer: [null, null],
+  rafId: null,
+};
+
+const $ = id => document.getElementById(id);
+
+async function startMonitor() {
+  if (state.stream) state.stream.getTracks().forEach(t => t.stop());
+
+  // デフォルト入力デバイスを2chで取得（デバイス指定なし）
+  const constraints = {
+    audio: {
+      channelCount: { ideal: 2 },
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+    }
+  };
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+  } catch(e) {
+    $('statusMsg').textContent = `マイク取得失敗: ${e.name} / ${e.message}`;
+    return;
+  }
+
+  const track = stream.getAudioTracks()[0];
+  const settings = track.getSettings();
+  const actualCh = settings.channelCount || 1;
+
+  // デバイス名を表示
+  $('devName').textContent = track.label || '（不明なデバイス）';
+
+  const warnEl = $('warnMsg');
+  if (actualCh < 2) {
+    warnEl.textContent = `⚠ このデバイスは ${actualCh}ch のみ取得できました。MIC 2 は MIC 1 と同じ表示になります。入力デバイスがAudio I/Fになっているか確認してください。`;
+    warnEl.style.display = 'block';
+  } else {
+    warnEl.style.display = 'none';
+  }
+
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = ctx.createMediaStreamSource(stream);
+  const splitter = ctx.createChannelSplitter(Math.max(actualCh, 2));
+  src.connect(splitter);
+
+  state.analysers = [0, 1].map(i => {
+    const an = ctx.createAnalyser();
+    an.fftSize = 1024;
+    an.smoothingTimeConstant = 0.7;
+    const ch = Math.min(i, actualCh - 1);
+    splitter.connect(an, ch);
+    return an;
+  });
+
+  state.stream = stream;
+  state.running = true;
+  $('startBtn').textContent = '■ 停止';
+  $('startBtn').classList.add('active');
+  $('statusMsg').textContent = `モニタリング中… (${actualCh}ch 取得)`;
+  drawLoop();
+}
+
+function stopMonitor() {
+  state.running = false;
+  cancelAnimationFrame(state.rafId);
+  if (state.stream) state.stream.getTracks().forEach(t => t.stop());
+  state.stream = null;
+  state.analysers = [null, null];
+  $('startBtn').textContent = '▶ 開始';
+  $('startBtn').classList.remove('active');
+  $('statusMsg').textContent = '停止しました。';
+  $('warnMsg').style.display = 'none';
+}
+
+function getRMS(analyser) {
+  const buf = new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
+  let sum = 0;
+  for (let v of buf) sum += v * v;
+  return Math.sqrt(sum / buf.length);
+}
+
+function toDb(rms) { return rms < 1e-6 ? -Infinity : 20 * Math.log10(rms); }
+
+let dbValues = [-Infinity, -Infinity];
+let lastDiffDraw = 0;
+let lastDiffVal = 0;
+const DIFF_BAR_INTERVAL = 300;
+const DIFF_VAL_INTERVAL = 300;
+
+function drawLoop() {
+  if (!state.running) return;
+  for (let i = 0; i < 2; i++) {
+    const an = state.analysers[i];
+    if (!an) continue;
+    const db = toDb(getRMS(an));
+    dbValues[i] = db;
+    const pct = Math.max(0, Math.min(100, (db + 60) / 60 * 100));
+    $(`vu${i+1}`).style.width = pct + '%';
+    $(`db${i+1}`).textContent = isFinite(db) ? db.toFixed(1) + ' dB' : '-∞ dB';
+    if (db > state.peakHold[i]) {
+      state.peakHold[i] = db;
+      clearTimeout(state.peakTimer[i]);
+      state.peakTimer[i] = setTimeout(() => state.peakHold[i] = -Infinity, 2000);
+    }
+    $(`peak${i+1}`).classList.toggle('active', db > -1);
+  }
+  const now = performance.now();
+  if (isFinite(dbValues[0]) && isFinite(dbValues[1])) {
+    const diff = dbValues[0] - dbValues[1];
+    const absDiff = Math.abs(diff);
+
+    if (now - lastDiffVal > DIFF_VAL_INTERVAL) {
+      lastDiffVal = now;
+      const diffEl = $('diffVal');
+      diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' dB';
+      diffEl.className = 'diff-value' + (absDiff > 6 ? ' danger' : absDiff > 3 ? ' warn' : '');
+      $('diffWho').textContent = absDiff < 0.5 ? 'BALANCED' : diff > 0 ? 'MIC1 > MIC2' : 'MIC2 > MIC1';
+    }
+
+    if (now - lastDiffDraw > DIFF_BAR_INTERVAL) {
+      lastDiffDraw = now;
+      const maxRange = 10;
+      const offset = Math.max(-maxRange, Math.min(maxRange, diff));
+      const barPct = Math.abs(offset) / maxRange * 50;
+      const bar = $('diffBar');
+      // MIC1大 → 左伸び、MIC2大 → 右伸び
+      if (offset >= 0) {
+        bar.style.left = (50 - barPct) + '%';
+      } else {
+        bar.style.left = '50%';
+      }
+      bar.style.width = barPct + '%';
+      bar.style.background = absDiff > 6 ? '#c0442a' : absDiff > 3 ? '#DE7A22' : '#20948B';
+    }
+  } else {
+    $('diffVal').textContent = '— dB';
+    $('diffWho').textContent = '';
+  }
+  state.rafId = requestAnimationFrame(drawLoop);
+}
+
+$('startBtn').addEventListener('click', () => state.running ? stopMonitor() : startMonitor());
+
+const howModal = $('howModal');
+$('howLink').addEventListener('click', e => { e.preventDefault(); howModal.style.display = 'flex'; });
+$('howClose').addEventListener('click', () => { howModal.style.display = 'none'; });
+howModal.addEventListener('click', e => { if (e.target === howModal) howModal.style.display = 'none'; });
+
+const helpModal = $('helpModal');
+$('helpLink').addEventListener('click', e => { e.preventDefault(); helpModal.style.display = 'flex'; });
+$('helpClose').addEventListener('click', () => { helpModal.style.display = 'none'; });
+helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.style.display = 'none'; });
+</script>
+</body>
+</html>
