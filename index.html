@@ -7,41 +7,41 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #0e3d38;
-    color: #d6ede8;
+    background: #071510;
+    color: #f0faf8;
     font-family: 'Courier New', monospace;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 16px;
+    padding: 28px 16px;
   }
   h1 {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     letter-spacing: 0.2em;
     color: #F4CC70;
     text-transform: uppercase;
     margin-bottom: 6px;
-    text-shadow: 0 1px 8px rgba(244,204,112,0.25);
+    text-shadow: 0 1px 10px rgba(244,204,112,0.3);
   }
   .subtitle {
-    font-size: 0.72rem;
-    color: #6AB187;
-    letter-spacing: 0.12em;
-    margin-bottom: 20px;
-    opacity: 0.8;
+    font-size: 0.88rem;
+    color: #7dd8b8;
+    letter-spacing: 0.14em;
+    margin-bottom: 24px;
   }
   .device-info {
     width: 100%;
     max-width: 820px;
-    background: #154f48;
-    border: 1px solid #20948B;
+    background: #0f2e27;
+    border: 1px solid #2aafa6;
     border-radius: 6px;
-    padding: 10px 14px;
-    margin-bottom: 18px;
-    font-size: 0.76rem;
-    color: #6AB187;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+    color: #7dd8b8;
     letter-spacing: 0.05em;
+    line-height: 1.7;
   }
   .device-info strong { color: #F4CC70; font-weight: normal; }
   .monitors {
@@ -53,47 +53,48 @@
   }
   .channel {
     flex: 1;
-    background: #154f48;
-    border: 1px solid #20948B;
+    background: #0f2e27;
+    border: 1px solid #2aafa6;
     border-radius: 8px;
-    padding: 16px;
+    padding: 18px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
   }
   .channel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .channel-label { font-size: 0.85rem; letter-spacing: 0.15em; color: #6AB187; }
+  .channel-label { font-size: 1.05rem; letter-spacing: 0.15em; color: #f0faf8; }
   .ch-badge {
-    font-size: 0.68rem;
-    color: #20948B;
+    font-size: 0.78rem;
+    color: #2aafa6;
     letter-spacing: 0.1em;
-    border: 1px solid #20948B;
+    border: 1px solid #2aafa6;
     border-radius: 3px;
-    padding: 1px 6px;
+    padding: 2px 8px;
   }
   .peak-led {
-    width: 14px; height: 14px;
+    width: 16px; height: 16px;
     border-radius: 50%;
-    background: #0e3d38;
-    border: 1px solid #20948B;
+    background: #071510;
+    border: 1px solid #2aafa6;
     transition: background 0.05s;
   }
   .peak-led.active {
     background: #DE7A22;
-    box-shadow: 0 0 9px #DE7A22;
+    box-shadow: 0 0 10px #DE7A22;
   }
   .vu-wrap { display: flex; flex-direction: column; gap: 4px; }
-  .vu-row { display: flex; align-items: center; gap: 8px; }
-  .vu-label { font-size: 0.7rem; color: #6AB187; width: 16px; }
+  .vu-row { display: flex; align-items: center; gap: 10px; }
+  .vu-label { font-size: 0.85rem; color: #7dd8b8; width: 16px; }
   .vu-bar-bg {
-    flex: 1; height: 22px;
-    background: #092e2a;
-    border-radius: 3px;
+    flex: 1; height: 26px;
+    background: #071510;
+    border-radius: 4px;
     overflow: hidden;
+    border: 1px solid #1a5e56;
   }
   .vu-bar {
     height: 100%; width: 0%;
@@ -101,65 +102,78 @@
     transition: width 0.03s;
     background: linear-gradient(to right, #20948B 50%, #F4CC70 78%, #DE7A22 100%);
   }
-  .vu-db { font-size: 0.8rem; color: #6AB187; width: 56px; text-align: right; }
+  .vu-db { font-size: 1rem; color: #f0faf8; width: 64px; text-align: right; }
 
   .diff-panel {
     width: 100%; max-width: 820px;
-    background: #154f48;
-    border: 1px solid #20948B;
+    background: #0f2e27;
+    border: 1px solid #2aafa6;
     border-radius: 8px;
-    padding: 16px 20px;
+    padding: 18px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
   }
-  .diff-label { font-size: 0.8rem; color: #6AB187; letter-spacing: 0.1em; }
-  .diff-sublabel { font-size: 0.65rem; color: #20948B; letter-spacing: 0.05em; margin-top: 4px; }
+  .diff-label { font-size: 0.95rem; color: #7dd8b8; letter-spacing: 0.1em; }
+  .diff-sublabel { font-size: 0.75rem; color: #2aafa6; letter-spacing: 0.05em; margin-top: 5px; }
   .diff-value {
-    font-size: 1.8rem; font-weight: bold;
+    font-size: 2.2rem; font-weight: bold;
     letter-spacing: 0.05em;
     color: #F4CC70;
     transition: color 0.1s;
-    min-width: 100px; text-align: center;
+    min-width: 110px; text-align: center;
   }
   .diff-value.warn { color: #DE7A22; }
-  .diff-value.danger { color: #c0442a; }
+  .diff-value.danger { color: #e04030; }
   .diff-bar-wrap {
-    flex: 1; height: 10px;
-    background: #092e2a;
-    border-radius: 5px;
+    flex: 1; height: 12px;
+    background: #071510;
+    border-radius: 6px;
+    border: 1px solid #1a5e56;
     position: relative; overflow: visible;
   }
   .diff-bar-fill {
     position: absolute; height: 100%;
-    border-radius: 5px;
+    border-radius: 6px;
     background: #20948B;
     transition: all 0.1s;
   }
   .diff-center {
-    position: absolute; left: 50%; top: -3px;
-    width: 2px; height: 16px;
-    background: #20948B;
+    position: absolute; left: 50%; top: -4px;
+    width: 2px; height: 20px;
+    background: #2aafa6;
     transform: translateX(-50%);
   }
-  .controls { margin-top: 16px; display: flex; gap: 12px; }
+  .diff-who {
+    min-width: 70px; text-align: right;
+    font-size: 0.82rem; color: #7dd8b8;
+    letter-spacing: 0.05em;
+  }
+  .controls { margin-top: 18px; display: flex; gap: 12px; }
   button {
-    padding: 9px 22px;
+    padding: 11px 26px;
     border-radius: 5px;
-    border: 1px solid #20948B;
-    background: #154f48;
-    color: #d6ede8;
+    border: 1px solid #2aafa6;
+    background: #0f2e27;
+    color: #f0faf8;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     letter-spacing: 0.1em;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
   }
-  button:hover { background: #1a6660; border-color: #6AB187; }
+  button:hover { background: #1a4d44; border-color: #7dd8b8; }
   button.active { background: #1a3a20; border-color: #F4CC70; color: #F4CC70; }
-  .status { font-size: 0.72rem; color: #6AB187; opacity: 0.75; margin-top: 8px; }
-  .warn-msg { font-size: 0.72rem; color: #DE7A22; margin-top: 6px; display: none; }
+  .status { font-size: 0.85rem; color: #7dd8b8; margin-top: 10px; }
+  .warn-msg { font-size: 0.82rem; color: #DE7A22; margin-top: 8px; display: none; }
+  .footer-links { margin-top: 14px; display: flex; gap: 20px; }
+  .footer-links a {
+    font-size: 0.85rem; color: #7dd8b8;
+    text-decoration: none; letter-spacing: 0.08em;
+    border-bottom: 1px solid #2aafa6;
+    padding-bottom: 1px;
+  }
 </style>
 </head>
 <body>
@@ -206,14 +220,14 @@
 <div class="diff-panel">
   <div>
     <div class="diff-label">LEVEL DIFF</div>
-    <div class="diff-sublabel" id="avgProgress">蓄積中 0s / 15s</div>
+    <div class="diff-sublabel" id="avgProgress">蓄積中 0s / 6s</div>
   </div>
   <div class="diff-value" id="diffVal">— dB</div>
   <div class="diff-bar-wrap">
     <div class="diff-center"></div>
     <div class="diff-bar-fill" id="diffBar" style="left:50%;width:0%"></div>
   </div>
-  <span class="diff-label" id="diffWho" style="min-width:60px;text-align:right;font-size:0.75rem;"></span>
+  <div class="diff-who" id="diffWho"></div>
 </div>
 
 <div class="controls">
@@ -223,73 +237,73 @@
 <div class="status" id="statusMsg">「開始」を押して、マイクへのアクセスを許可してください。</div>
 <div class="warn-msg" id="warnMsg"></div>
 
-<div style="margin-top:12px; display:flex; gap:16px;">
-  <a href="#" id="howLink" style="font-size:0.75rem;color:#6AB187;opacity:0.75;text-decoration:none;letter-spacing:0.08em;border-bottom:1px solid #20948B;">使い方</a>
-  <a href="#" id="helpLink" style="font-size:0.75rem;color:#6AB187;opacity:0.75;text-decoration:none;letter-spacing:0.08em;border-bottom:1px solid #20948B;">うまく動かないときは</a>
+<div class="footer-links">
+  <a href="#" id="howLink">使い方</a>
+  <a href="#" id="helpLink">うまく動かないときは</a>
 </div>
 
 <!-- How-to Modal -->
-<div id="howModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;">
-  <div style="background:#154f48;border:1px solid #20948B;border-radius:10px;padding:28px 28px 24px;max-width:480px;width:90%;position:relative;">
-    <button id="howClose" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#6AB187;font-size:1.2rem;cursor:pointer;padding:0;">✕</button>
-    <h2 style="font-size:0.95rem;letter-spacing:0.15em;color:#F4CC70;margin-bottom:18px;">使い方</h2>
-    <div style="margin-bottom:16px;">
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">推奨環境</div>
-      <ul style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+<div id="howModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#0f2e27;border:1px solid #2aafa6;border-radius:10px;padding:30px;max-width:500px;width:90%;position:relative;">
+    <button id="howClose" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#7dd8b8;font-size:1.4rem;cursor:pointer;padding:0;">✕</button>
+    <h2 style="font-size:1.05rem;letter-spacing:0.15em;color:#F4CC70;margin-bottom:20px;">使い方</h2>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.85rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:10px;">推奨環境</div>
+      <ul style="font-size:0.88rem;color:#f0faf8;line-height:1.9;padding-left:1.2em;">
         <li>OS：Mac</li>
         <li>ブラウザ：Google Chrome</li>
       </ul>
     </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">手順</div>
-      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
-        <li>Audio I/F を Mac に接続し、2本のマイクをそれぞれ CH1・CH2 に挿す</li>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.85rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:10px;">手順</div>
+      <ol style="font-size:0.88rem;color:#f0faf8;line-height:1.9;padding-left:1.2em;">
+        <li>Audio I/F を Mac に接続し、2本のマイクを CH1・CH2 に挿す</li>
         <li>Macの「システム設定 → サウンド → 入力」で Audio I/F を選択する</li>
         <li>この HTML ファイルを Chrome で開く（ダブルクリックでOK）</li>
         <li>「開始」を押し、マイクへのアクセスを「許可」する</li>
-        <li>2人が交互に会話しながら、約15秒待つ</li>
-        <li>LEVEL DIFF が「15s AVG」になったら平均レベル差を確認する</li>
+        <li>2人が交互に会話しながら約6秒待つ</li>
+        <li>LEVEL DIFF が「6s AVG」になったら平均レベル差を確認する</li>
       </ol>
     </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">LEVEL DIFF の見方（15秒平均）</div>
-      <ul style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.85rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:10px;">LEVEL DIFF の見方（6秒平均）</div>
+      <ul style="font-size:0.88rem;color:#f0faf8;line-height:1.9;padding-left:1.2em;">
         <li>バーが中央：2本のレベルが揃っている</li>
         <li>バーが左：MIC 1 の方が大きい</li>
         <li>バーが右：MIC 2 の方が大きい</li>
-        <li style="color:#D9B44A;">黄色：3dB 以上の差</li>
-        <li style="color:#c0442a;">赤：6dB 以上の差（要調整）</li>
+        <li style="color:#F4CC70;">黄色：3dB 以上の差</li>
+        <li style="color:#e04030;">赤：6dB 以上の差（要調整）</li>
       </ul>
     </div>
     <div>
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">AVG リセットボタン</div>
-      <p style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;">平均バッファをクリアして最初から計測し直したいときに使います。</p>
+      <div style="font-size:0.85rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:10px;">AVG リセットボタン</div>
+      <p style="font-size:0.88rem;color:#f0faf8;line-height:1.8;">平均バッファをクリアして最初から計測し直すときに使います。</p>
     </div>
   </div>
 </div>
 
 <!-- Help Modal -->
-<div id="helpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;">
-  <div style="background:#154f48;border:1px solid #20948B;border-radius:10px;padding:28px 28px 24px;max-width:480px;width:90%;position:relative;">
-    <button id="helpClose" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#6AB187;font-size:1.2rem;cursor:pointer;padding:0;">✕</button>
-    <h2 style="font-size:0.95rem;letter-spacing:0.15em;color:#F4CC70;margin-bottom:18px;">うまく動かないときは</h2>
-    <div style="margin-bottom:16px;">
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">確認 1 — MacのI/F認識</div>
-      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+<div id="helpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#0f2e27;border:1px solid #2aafa6;border-radius:10px;padding:30px;max-width:500px;width:90%;position:relative;">
+    <button id="helpClose" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#7dd8b8;font-size:1.4rem;cursor:pointer;padding:0;">✕</button>
+    <h2 style="font-size:1.05rem;letter-spacing:0.15em;color:#F4CC70;margin-bottom:20px;">うまく動かないときは</h2>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.85rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:10px;">確認 1 — MacのI/F認識</div>
+      <ol style="font-size:0.88rem;color:#f0faf8;line-height:1.9;padding-left:1.2em;">
         <li>システム設定 → サウンド → 入力 に Audio I/F が表示されているか確認</li>
-        <li>I/Fを選択し、入力レベルのバーが動くか確認</li>
+        <li>I/F を選択し、入力レベルのバーが動くか確認</li>
       </ol>
     </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">確認 2 — Chromeのマイク許可</div>
-      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.85rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:10px;">確認 2 — Chromeのマイク許可</div>
+      <ol style="font-size:0.88rem;color:#f0faf8;line-height:1.9;padding-left:1.2em;">
         <li>アドレスバー左のアイコン → サイトの設定 → マイクを「許可」に</li>
         <li>ページを再読み込みして再度「開始」を押す</li>
       </ol>
     </div>
     <div>
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">確認 3 — MIC 2 が動かない</div>
-      <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
+      <div style="font-size:0.85rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:10px;">確認 3 — MIC 2 が動かない</div>
+      <ol style="font-size:0.88rem;color:#f0faf8;line-height:1.9;padding-left:1.2em;">
         <li>画面上部の「入力デバイス」が Audio I/F の名前になっているか確認</li>
         <li>内蔵マイクになっている場合は、システム設定で I/F を選び直してからページを再読み込み</li>
       </ol>
@@ -309,7 +323,6 @@ const state = {
 
 const $ = id => document.getElementById(id);
 
-// 15秒平均バッファ（100ms × 150サンプル）
 const AVG_SAMPLES = 60;
 const AVG_INTERVAL = 100;
 const rmsBuffers = [[], []];
@@ -323,7 +336,7 @@ function resetAvg() {
   $('diffWho').textContent = '';
   $('diffBar').style.width = '0%';
   $('diffBar').style.left = '50%';
-  $('avgProgress').textContent = '蓄積中 0s / 15s';
+  $('avgProgress').textContent = '蓄積中 0s / 6s';
 }
 
 async function startMonitor() {
@@ -378,7 +391,7 @@ async function startMonitor() {
   state.running = true;
   $('startBtn').textContent = '■ 停止';
   $('startBtn').classList.add('active');
-  $('statusMsg').textContent = `モニタリング中… (${actualCh}ch 取得) — 15秒間会話しながらお待ちください`;
+  $('statusMsg').textContent = `モニタリング中… (${actualCh}ch 取得) — 6秒間会話しながらお待ちください`;
   drawLoop();
 }
 
@@ -408,7 +421,6 @@ function drawLoop() {
   if (!state.running) return;
   const now = performance.now();
 
-  // VUメーター：リアルタイム更新
   const rmsNow = [0, 0];
   for (let i = 0; i < 2; i++) {
     const an = state.analysers[i];
@@ -427,21 +439,17 @@ function drawLoop() {
     $(`peak${i+1}`).classList.toggle('active', db > -1);
   }
 
-  // 100ms間隔でサンプリング → 15秒バッファに蓄積
   if (now - lastSampleTime >= AVG_INTERVAL) {
     lastSampleTime = now;
-
     for (let i = 0; i < 2; i++) {
       rmsBuffers[i].push(rmsNow[i]);
       if (rmsBuffers[i].length > AVG_SAMPLES) rmsBuffers[i].shift();
     }
 
-    // 進捗表示
     const n = rmsBuffers[0].length;
     const sec = Math.floor(n * AVG_INTERVAL / 1000);
     $('avgProgress').textContent = n >= AVG_SAMPLES ? '6s AVG' : `蓄積中 ${sec}s / 6s`;
 
-    // LEVEL DIFF：平均RMSから差分を計算
     if (n > 0) {
       const avg0 = rmsBuffers[0].reduce((a,b) => a+b, 0) / rmsBuffers[0].length;
       const avg1 = rmsBuffers[1].reduce((a,b) => a+b, 0) / rmsBuffers[1].length;
@@ -460,7 +468,7 @@ function drawLoop() {
         const bar = $('diffBar');
         bar.style.left = offset >= 0 ? (50 - barPct) + '%' : '50%';
         bar.style.width = barPct + '%';
-        bar.style.background = absDiff > 6 ? '#c0442a' : absDiff > 3 ? '#DE7A22' : '#20948B';
+        bar.style.background = absDiff > 6 ? '#e04030' : absDiff > 3 ? '#DE7A22' : '#20948B';
       }
     }
   }
