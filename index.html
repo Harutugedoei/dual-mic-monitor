@@ -115,6 +115,7 @@
     gap: 16px;
   }
   .diff-label { font-size: 0.8rem; color: #6AB187; letter-spacing: 0.1em; }
+  .diff-sublabel { font-size: 0.65rem; color: #20948B; letter-spacing: 0.05em; margin-top: 4px; }
   .diff-value {
     font-size: 1.8rem; font-weight: bold;
     letter-spacing: 0.05em;
@@ -134,7 +135,7 @@
     position: absolute; height: 100%;
     border-radius: 5px;
     background: #20948B;
-    transition: all 0.05s;
+    transition: all 0.1s;
   }
   .diff-center {
     position: absolute; left: 50%; top: -3px;
@@ -158,10 +159,7 @@
   button:hover { background: #1a6660; border-color: #6AB187; }
   button.active { background: #1a3a20; border-color: #F4CC70; color: #F4CC70; }
   .status { font-size: 0.72rem; color: #6AB187; opacity: 0.75; margin-top: 8px; }
-  .warn-msg {
-    font-size: 0.72rem; color: #DE7A22;
-    margin-top: 6px; display: none;
-  }
+  .warn-msg { font-size: 0.72rem; color: #DE7A22; margin-top: 6px; display: none; }
 </style>
 </head>
 <body>
@@ -174,7 +172,6 @@
 </div>
 
 <div class="monitors">
-  <!-- MIC 1 = Ch1 -->
   <div class="channel">
     <div class="channel-header">
       <span class="channel-label">MIC 1</span>
@@ -190,7 +187,6 @@
     </div>
   </div>
 
-  <!-- MIC 2 = Ch2 -->
   <div class="channel">
     <div class="channel-header">
       <span class="channel-label">MIC 2</span>
@@ -208,7 +204,10 @@
 </div>
 
 <div class="diff-panel">
-  <span class="diff-label">LEVEL DIFF</span>
+  <div>
+    <div class="diff-label">LEVEL DIFF</div>
+    <div class="diff-sublabel" id="avgProgress">蓄積中 0s / 15s</div>
+  </div>
   <div class="diff-value" id="diffVal">— dB</div>
   <div class="diff-bar-wrap">
     <div class="diff-center"></div>
@@ -219,6 +218,7 @@
 
 <div class="controls">
   <button id="startBtn">▶ 開始</button>
+  <button id="avgResetBtn">AVG リセット</button>
 </div>
 <div class="status" id="statusMsg">「開始」を押して、マイクへのアクセスを許可してください。</div>
 <div class="warn-msg" id="warnMsg"></div>
@@ -233,7 +233,6 @@
   <div style="background:#154f48;border:1px solid #20948B;border-radius:10px;padding:28px 28px 24px;max-width:480px;width:90%;position:relative;">
     <button id="howClose" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#6AB187;font-size:1.2rem;cursor:pointer;padding:0;">✕</button>
     <h2 style="font-size:0.95rem;letter-spacing:0.15em;color:#F4CC70;margin-bottom:18px;">使い方</h2>
-
     <div style="margin-bottom:16px;">
       <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">推奨環境</div>
       <ul style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
@@ -241,7 +240,6 @@
         <li>ブラウザ：Google Chrome</li>
       </ul>
     </div>
-
     <div style="margin-bottom:16px;">
       <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">手順</div>
       <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
@@ -249,19 +247,23 @@
         <li>Macの「システム設定 → サウンド → 入力」で Audio I/F を選択する</li>
         <li>この HTML ファイルを Chrome で開く（ダブルクリックでOK）</li>
         <li>「開始」を押し、マイクへのアクセスを「許可」する</li>
-        <li>MIC 1（CH1）と MIC 2（CH2）のレベルを確認する</li>
+        <li>2人が交互に会話しながら、約15秒待つ</li>
+        <li>LEVEL DIFF が「15s AVG」になったら平均レベル差を確認する</li>
       </ol>
     </div>
-
-    <div>
-      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">LEVEL DIFF の見方</div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">LEVEL DIFF の見方（15秒平均）</div>
       <ul style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
         <li>バーが中央：2本のレベルが揃っている</li>
         <li>バーが左：MIC 1 の方が大きい</li>
         <li>バーが右：MIC 2 の方が大きい</li>
         <li style="color:#D9B44A;">黄色：3dB 以上の差</li>
-        <li style="color:#c0442a;">赤：6dB 以上の差</li>
+        <li style="color:#c0442a;">赤：6dB 以上の差（要調整）</li>
       </ul>
+    </div>
+    <div>
+      <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">AVG リセットボタン</div>
+      <p style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;">平均バッファをクリアして最初から計測し直したいときに使います。</p>
     </div>
   </div>
 </div>
@@ -288,7 +290,7 @@
     <div>
       <div style="font-size:0.78rem;color:#DE7A22;letter-spacing:0.1em;margin-bottom:8px;">確認 3 — MIC 2 が動かない</div>
       <ol style="font-size:0.8rem;color:#d6ede8;opacity:0.85;line-height:1.8;padding-left:1.2em;">
-        <li>画面上部の「入力デバイス」表示が Audio I/F の名前になっているか確認</li>
+        <li>画面上部の「入力デバイス」が Audio I/F の名前になっているか確認</li>
         <li>内蔵マイクになっている場合は、システム設定で I/F を選び直してからページを再読み込み</li>
       </ol>
     </div>
@@ -307,10 +309,27 @@ const state = {
 
 const $ = id => document.getElementById(id);
 
+// 15秒平均バッファ（100ms × 150サンプル）
+const AVG_SAMPLES = 60;
+const AVG_INTERVAL = 100;
+const rmsBuffers = [[], []];
+let lastSampleTime = 0;
+
+function resetAvg() {
+  rmsBuffers[0].length = 0;
+  rmsBuffers[1].length = 0;
+  lastSampleTime = 0;
+  $('diffVal').textContent = '— dB';
+  $('diffWho').textContent = '';
+  $('diffBar').style.width = '0%';
+  $('diffBar').style.left = '50%';
+  $('avgProgress').textContent = '蓄積中 0s / 15s';
+}
+
 async function startMonitor() {
   if (state.stream) state.stream.getTracks().forEach(t => t.stop());
+  resetAvg();
 
-  // デフォルト入力デバイスを2chで取得（デバイス指定なし）
   const constraints = {
     audio: {
       channelCount: { ideal: 2 },
@@ -332,12 +351,11 @@ async function startMonitor() {
   const settings = track.getSettings();
   const actualCh = settings.channelCount || 1;
 
-  // デバイス名を表示
   $('devName').textContent = track.label || '（不明なデバイス）';
 
   const warnEl = $('warnMsg');
   if (actualCh < 2) {
-    warnEl.textContent = `⚠ このデバイスは ${actualCh}ch のみ取得できました。MIC 2 は MIC 1 と同じ表示になります。入力デバイスがAudio I/Fになっているか確認してください。`;
+    warnEl.textContent = `⚠ このデバイスは ${actualCh}ch のみ取得できました。MIC 2 は MIC 1 と同じ表示になります。入力デバイスが Audio I/F になっているか確認してください。`;
     warnEl.style.display = 'block';
   } else {
     warnEl.style.display = 'none';
@@ -352,8 +370,7 @@ async function startMonitor() {
     const an = ctx.createAnalyser();
     an.fftSize = 1024;
     an.smoothingTimeConstant = 0.7;
-    const ch = Math.min(i, actualCh - 1);
-    splitter.connect(an, ch);
+    splitter.connect(an, Math.min(i, actualCh - 1));
     return an;
   });
 
@@ -361,7 +378,7 @@ async function startMonitor() {
   state.running = true;
   $('startBtn').textContent = '■ 停止';
   $('startBtn').classList.add('active');
-  $('statusMsg').textContent = `モニタリング中… (${actualCh}ch 取得)`;
+  $('statusMsg').textContent = `モニタリング中… (${actualCh}ch 取得) — 15秒間会話しながらお待ちください`;
   drawLoop();
 }
 
@@ -387,19 +404,18 @@ function getRMS(analyser) {
 
 function toDb(rms) { return rms < 1e-6 ? -Infinity : 20 * Math.log10(rms); }
 
-let dbValues = [-Infinity, -Infinity];
-let lastDiffDraw = 0;
-let lastDiffVal = 0;
-const DIFF_BAR_INTERVAL = 300;
-const DIFF_VAL_INTERVAL = 300;
-
 function drawLoop() {
   if (!state.running) return;
+  const now = performance.now();
+
+  // VUメーター：リアルタイム更新
+  const rmsNow = [0, 0];
   for (let i = 0; i < 2; i++) {
     const an = state.analysers[i];
     if (!an) continue;
-    const db = toDb(getRMS(an));
-    dbValues[i] = db;
+    const rms = getRMS(an);
+    rmsNow[i] = rms;
+    const db = toDb(rms);
     const pct = Math.max(0, Math.min(100, (db + 60) / 60 * 100));
     $(`vu${i+1}`).style.width = pct + '%';
     $(`db${i+1}`).textContent = isFinite(db) ? db.toFixed(1) + ' dB' : '-∞ dB';
@@ -410,42 +426,50 @@ function drawLoop() {
     }
     $(`peak${i+1}`).classList.toggle('active', db > -1);
   }
-  const now = performance.now();
-  if (isFinite(dbValues[0]) && isFinite(dbValues[1])) {
-    const diff = dbValues[0] - dbValues[1];
-    const absDiff = Math.abs(diff);
 
-    if (now - lastDiffVal > DIFF_VAL_INTERVAL) {
-      lastDiffVal = now;
-      const diffEl = $('diffVal');
-      diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' dB';
-      diffEl.className = 'diff-value' + (absDiff > 6 ? ' danger' : absDiff > 3 ? ' warn' : '');
-      $('diffWho').textContent = absDiff < 0.5 ? 'BALANCED' : diff > 0 ? 'MIC1 > MIC2' : 'MIC2 > MIC1';
+  // 100ms間隔でサンプリング → 15秒バッファに蓄積
+  if (now - lastSampleTime >= AVG_INTERVAL) {
+    lastSampleTime = now;
+
+    for (let i = 0; i < 2; i++) {
+      rmsBuffers[i].push(rmsNow[i]);
+      if (rmsBuffers[i].length > AVG_SAMPLES) rmsBuffers[i].shift();
     }
 
-    if (now - lastDiffDraw > DIFF_BAR_INTERVAL) {
-      lastDiffDraw = now;
-      const maxRange = 10;
-      const offset = Math.max(-maxRange, Math.min(maxRange, diff));
-      const barPct = Math.abs(offset) / maxRange * 50;
-      const bar = $('diffBar');
-      // MIC1大 → 左伸び、MIC2大 → 右伸び
-      if (offset >= 0) {
-        bar.style.left = (50 - barPct) + '%';
-      } else {
-        bar.style.left = '50%';
+    // 進捗表示
+    const n = rmsBuffers[0].length;
+    const sec = Math.floor(n * AVG_INTERVAL / 1000);
+    $('avgProgress').textContent = n >= AVG_SAMPLES ? '6s AVG' : `蓄積中 ${sec}s / 6s`;
+
+    // LEVEL DIFF：平均RMSから差分を計算
+    if (n > 0) {
+      const avg0 = rmsBuffers[0].reduce((a,b) => a+b, 0) / rmsBuffers[0].length;
+      const avg1 = rmsBuffers[1].reduce((a,b) => a+b, 0) / rmsBuffers[1].length;
+      const diff = toDb(avg0) - toDb(avg1);
+      const absDiff = Math.abs(diff);
+
+      if (isFinite(diff)) {
+        const diffEl = $('diffVal');
+        diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' dB';
+        diffEl.className = 'diff-value' + (absDiff > 6 ? ' danger' : absDiff > 3 ? ' warn' : '');
+        $('diffWho').textContent = absDiff < 0.5 ? 'BALANCED' : diff > 0 ? 'MIC1 > MIC2' : 'MIC2 > MIC1';
+
+        const maxRange = 10;
+        const offset = Math.max(-maxRange, Math.min(maxRange, diff));
+        const barPct = Math.abs(offset) / maxRange * 50;
+        const bar = $('diffBar');
+        bar.style.left = offset >= 0 ? (50 - barPct) + '%' : '50%';
+        bar.style.width = barPct + '%';
+        bar.style.background = absDiff > 6 ? '#c0442a' : absDiff > 3 ? '#DE7A22' : '#20948B';
       }
-      bar.style.width = barPct + '%';
-      bar.style.background = absDiff > 6 ? '#c0442a' : absDiff > 3 ? '#DE7A22' : '#20948B';
     }
-  } else {
-    $('diffVal').textContent = '— dB';
-    $('diffWho').textContent = '';
   }
+
   state.rafId = requestAnimationFrame(drawLoop);
 }
 
 $('startBtn').addEventListener('click', () => state.running ? stopMonitor() : startMonitor());
+$('avgResetBtn').addEventListener('click', resetAvg);
 
 const howModal = $('howModal');
 $('howLink').addEventListener('click', e => { e.preventDefault(); howModal.style.display = 'flex'; });
